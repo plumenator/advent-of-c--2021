@@ -37,10 +37,9 @@ Use the binary numbers in your diagnostic report to calculate the gamma rate and
 #include <string>
 #include <array>
 #include <cmath>
+#include <vector>
 
-constexpr size_t size = 12;
-
-int from_ones(const std::array<int, size>& binary)
+int from_ones(const std::vector<int>& binary)
 {
   int num = 0;
   int index = 0;
@@ -51,8 +50,8 @@ int from_ones(const std::array<int, size>& binary)
   return num;
 }
 
-std::array<int, size> to_binary(const std::array<int, size>& ones, int total) {
-  std::array<int, size> binary;
+std::vector<int> to_binary(const std::vector<int>& ones, int total) {
+  std::vector<int> binary(ones.size());
   auto one = ones.begin();
   auto b = binary.begin();
   std::cout << "Binary:";
@@ -65,20 +64,25 @@ std::array<int, size> to_binary(const std::array<int, size>& ones, int total) {
 }
 
 int main() {
-  std::array<int, size> ones {0, 0, 0, 0, 0};
-  int total = 0;
-  for (std::string line; std::getline(std::cin, line);) {
+  int total = 1;
+  std::vector<int> ones ;
+  std::string line;
+  std::getline(std::cin, line);
+  for (auto c: line) {
+    ones.push_back(c - '0');
+  }
+  for (; std::getline(std::cin, line);) {
     ++total;
     auto one = ones.begin();
     auto c = line.begin();
-    for (; one != ones.end(); ++one, ++c) {
+    for (; c != line.end(); ++one, ++c) {
       *one += *c - '0';
     }
   }
   auto gamma_bits = to_binary(ones, total);
   auto gamma = from_ones(gamma_bits);
 
-  std::array<int, size> epsilon_bits;
+  std::vector<int> epsilon_bits(gamma_bits.size());
   auto gamma_bit = gamma_bits.begin();
   auto epsilon_bit = epsilon_bits.begin();
   for (; gamma_bit != gamma_bits.end(); ++gamma_bit, ++epsilon_bit) {

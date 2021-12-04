@@ -168,7 +168,7 @@ int main() {
     for (auto& card: cards) {
       card = mark(card, draw);
       if (bingo(card)) {
-        std::cout << draw << " * " << sum_unmarked(card) << " = " << sum_unmarked(card) * draw << std::endl;
+        // std::cout << draw << " * " << sum_unmarked(card) << " = " << sum_unmarked(card) * draw << std::endl;
         goto end;
       }
     }

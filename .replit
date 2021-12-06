@@ -1,1 +1,1 @@
-run = "g++ --std=c++20 day5part2.cpp && ./a.out < day5input.txt; rm a.out"
+run = "g++ --std=c++20 day6part2.cpp && ./a.out < day6input.txt; rm a.out"

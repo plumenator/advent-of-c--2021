@@ -61,19 +61,17 @@ For each entry, determine all of the wire/segment connections and decode the fou
 #include <cmath>
 
 template<typename T>
-std::vector<T> split(std::string line, std::string delim, auto toT(const std::string&) -> T) {
+std::vector<T> split(std::string line, const std::string& delim, auto toT(std::string) -> T) {
   std::vector<T> out;
   for (;;) {
     if(auto delim_position = line.find(delim);
           delim_position != std::string::npos) {
-      auto num_str = line.substr(0, delim_position);
-      out.push_back(toT(num_str));
+      out.push_back(toT(line.substr(0, delim_position)));
       line = line.substr(delim_position + delim.size());
     } else {
     break;
     }
   }
-  line = line[0] == ' ' ? line.substr(1) : line;
   out.push_back(toT(line));
   return out;
 }
@@ -86,36 +84,38 @@ enum class SegmentCount{
   Two = 2, Three, Four, Five, Six, Seven
 };
 
-std::set<char> diff(const std::map<Digit, std::set<char>>& actual_sets, Digit first, Digit second) {
+using SegmentSet = std::set<char>;
+
+SegmentSet diff(const std::map<Digit, SegmentSet>& actual_sets, Digit first, Digit second) {
   auto& first_set = actual_sets.at(first);
   auto& second_set = actual_sets.at(second);
-  std::set<char> out;
+  SegmentSet out;
   std:set_difference(first_set.begin(), first_set.end(), second_set.begin(), second_set.end(), std::inserter(out, out.begin()));
   return out;
 }
 
-std::set<char> diff(const std::set<char>& first_set, const std::set<char>& second_set) {
-  std::set<char> out;
+SegmentSet diff(const SegmentSet& first_set, const SegmentSet& second_set) {
+  SegmentSet out;
   std:set_difference(first_set.begin(), first_set.end(), second_set.begin(), second_set.end(), std::inserter(out, out.begin()));
   return out;
 }
 
 int main() {
-  auto identity = [](const std::string& s){
-     return std::string(s); 
+  auto identity = [](auto s){
+     return s; 
      };
      
-  std::vector<std::pair<std::array<std::string, 10>, std::array<std::string, 4>>> lines;
+  std::vector<std::pair<std::vector<std::string>, std::vector<std::string>>> lines;
   for (std::string line; std::getline(std::cin, line);) {
     auto parts = split<std::string>(line, " | ", identity);
-    std::array<std::string, 10> unique_signals;
-    auto unique_signals_str = split<std::string>(parts[0], " ", identity);
-    std::copy_n(std::make_move_iterator(unique_signals_str.begin()), 10, unique_signals.begin());
-    std::array<std::string, 4> number;
-    auto number_strs = split<std::string>(parts[1], " ", identity);
-    std::copy_n(std::make_move_iterator(number_strs.begin()), 4, number.begin());
+    assert(parts.size() == 2);
+    auto unique_signals = split<std::string>(parts[0], " ", identity);
+    assert(unique_signals.size() == 10);
+    auto number = split<std::string>(parts[1], " ", identity);
+    assert(number.size() == 4);
     lines.emplace_back(unique_signals, number);
   }
+
   const std::map<SegmentCount, Digit> unique_count = {
     {SegmentCount::Two, Digit::One},
     {SegmentCount::Four, Digit::Four},
@@ -123,7 +123,7 @@ int main() {
     {SegmentCount::Seven, Digit::Eight}
     };
 
-  const std::map<Digit, std::set<char>> reference_sets = {
+  const std::map<Digit, SegmentSet> reference_sets = {
     {Digit::Zero, {'a', 'b', 'c', 'e', 'f', 'g'}},
     {Digit::One, {'c', 'f'}},
     {Digit::Two, {'a', 'd', 'c', 'e', 'g'}},
@@ -135,20 +135,21 @@ int main() {
     {Digit::Eight, {'a', 'b', 'c', 'd', 'e', 'f', 'g'}},
     {Digit::Nine, {'a', 'b', 'c', 'd', 'f', 'g'}},
   };
+  
   int sum = 0;
-  for (auto [unique_signals, number]: lines) {
-    std::map<Digit, std::set<char>> actual_sets;
-    std::vector<std::set<char>> six_sets;
-    std::vector<std::set<char>> five_sets;
+  for (auto& [unique_signals, number]: lines) {
+    std::map<Digit, SegmentSet> actual_sets;
+    std::vector<SegmentSet> six_sets;
+    std::vector<SegmentSet> five_sets;
 
-    for (auto unique_signal: unique_signals) {
+    for (auto& unique_signal: unique_signals) {
       SegmentCount current_count = static_cast<SegmentCount>(unique_signal.size());
       if (unique_count.contains(current_count)) {
-        actual_sets[unique_count.at(current_count)] = std::set<char>(unique_signal.begin(), unique_signal.end());
+        actual_sets[unique_count.at(current_count)] = SegmentSet(unique_signal.begin(), unique_signal.end());
       } else if (current_count == SegmentCount::Six) {
-        six_sets.push_back(std::set<char>(unique_signal.begin(), unique_signal.end()));
+        six_sets.push_back(SegmentSet(unique_signal.begin(), unique_signal.end()));
       } else {
-        five_sets.push_back(std::set<char>(unique_signal.begin(), unique_signal.end()));
+        five_sets.push_back(SegmentSet(unique_signal.begin(), unique_signal.end()));
       }
     }
 
@@ -156,7 +157,7 @@ int main() {
     assert(six_sets.size() == 3);
     assert(five_sets.size() == 3);
 
-    for (auto six_set: six_sets) {
+    for (auto& six_set: six_sets) {
       auto c_or_d_or_e = diff(actual_sets.at(Digit::Eight), six_set);
       assert(c_or_d_or_e.size() == 1);
       if (diff(c_or_d_or_e, actual_sets.at(Digit::One)).size() == 1) {
@@ -171,7 +172,7 @@ int main() {
       }
     }
 
-    for (auto five_set: five_sets) {
+    for (auto& five_set: five_sets) {
       auto e_or_none = diff(five_set, actual_sets.at(Digit::Nine));
       assert(e_or_none.size() < 2);
       if (e_or_none.size() == 1) {
@@ -187,15 +188,17 @@ int main() {
       }
     }
 
-    std::map<std::set<char>, Digit> decoder;
+    assert(actual_sets.size() == 10);
+
+    std::map<SegmentSet, Digit> decoder;
     for (auto [digit, segment_set]: actual_sets) {
       decoder.emplace(segment_set, digit);
     }
 
     for (int i = 0; i < number.size(); ++i) {
       auto number_str = number[i];
-      std::set<char> segment_set = std::set<char>(number_str.begin(), number_str.end());
-      sum += std::pow(10, number.size() - i - 1) * static_cast<int>(decoder.at(std::set<char>(number_str.begin(), number_str.end())));
+      auto segment_set = SegmentSet(number_str.begin(), number_str.end());
+      sum += std::pow(10, number.size() - i - 1) * static_cast<int>(decoder.at(SegmentSet(number_str.begin(), number_str.end())));
     }
   }
 

@@ -60,6 +60,10 @@ For each entry, determine all of the wire/segment connections and decode the fou
 #include <cassert>
 #include <cmath>
 
+auto identity = [](auto s) {
+    return s; 
+};
+
 template<typename T>
 std::vector<T> split(std::string line, const std::string& delim, auto toT(std::string) -> T) {
   std::vector<T> out;
@@ -74,6 +78,16 @@ std::vector<T> split(std::string line, const std::string& delim, auto toT(std::s
   }
   out.push_back(toT(line));
   return out;
+}
+
+template<typename T>
+std::vector<T> split(std::string line, const std::string& delim) {
+  return split<T>(line, delim, identity);
+}
+
+template<typename T>
+std::vector<T> split(std::string line) {
+  return split<T>(line, " ");
 }
 
 enum class Digit {
@@ -100,18 +114,14 @@ SegmentSet diff(const SegmentSet& first_set, const SegmentSet& second_set) {
   return out;
 }
 
-int main() {
-  auto identity = [](auto s){
-     return s; 
-     };
-     
+int main() {     
   std::vector<std::pair<std::vector<std::string>, std::vector<std::string>>> lines;
   for (std::string line; std::getline(std::cin, line);) {
-    auto parts = split<std::string>(line, " | ", identity);
+    auto parts = split<std::string>(line, " | ");
     assert(parts.size() == 2);
-    auto unique_signals = split<std::string>(parts[0], " ", identity);
+    auto unique_signals = split<std::string>(parts[0]);
     assert(unique_signals.size() == 10);
-    auto number = split<std::string>(parts[1], " ", identity);
+    auto number = split<std::string>(parts[1]);
     assert(number.size() == 4);
     lines.emplace_back(unique_signals, number);
   }

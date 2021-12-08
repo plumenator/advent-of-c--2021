@@ -100,14 +100,6 @@ enum class SegmentCount{
 
 using SegmentSet = std::set<char>;
 
-SegmentSet diff(const std::map<Digit, SegmentSet>& actual_sets, Digit first, Digit second) {
-  auto& first_set = actual_sets.at(first);
-  auto& second_set = actual_sets.at(second);
-  SegmentSet out;
-  std:set_difference(first_set.begin(), first_set.end(), second_set.begin(), second_set.end(), std::inserter(out, out.begin()));
-  return out;
-}
-
 SegmentSet diff(const SegmentSet& first_set, const SegmentSet& second_set) {
   SegmentSet out;
   std:set_difference(first_set.begin(), first_set.end(), second_set.begin(), second_set.end(), std::inserter(out, out.begin()));

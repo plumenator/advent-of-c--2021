@@ -145,7 +145,7 @@ int main() {
     std::vector<SegmentSet> five_sets;
 
     for (auto& unique_signal: unique_signals) {
-      SegmentCount current_count = static_cast<SegmentCount>(unique_signal.size());
+      auto current_count = SegmentCount(unique_signal.size());
       if (unique_count.contains(current_count)) {
         actual_sets[unique_count.at(current_count)] = SegmentSet(unique_signal.begin(), unique_signal.end());
       } else if (current_count == SegmentCount::Six) {

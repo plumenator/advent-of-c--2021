@@ -80,31 +80,19 @@ int count_to_9(std::set<std::pair<int, int>>&& visited, const std::vector<std::v
   bool left = j == 0;
   bool right = j == heightmap[j].size() - 1;
 
-  if (left) {
-    if (top) {
-      return 1 + toright() + todown();
-    } else if (bottom) {
-      return 1 + toright() + toup();
-    } else {
-      return 1 + toright() + toup() + todown();
-    }
-  } else if (right) {
-    if (top) {
-      return 1 + toleft() + todown();
-    } else if (bottom) {
-      return 1 + toleft() + toup();
-    } else {
-      return 1 + toleft() + toup() + todown();
-    }        
-  } else {
-    if (top) {
-      return 1 + toleft() + toright() + todown();
-    } else if (bottom) {
-      return 1 + toleft() + toright() + toup();
-    } else {
-      return 1 + toleft() + toright() + toup() + todown();
-    }
-  }
+  auto topbottom = [&]() {
+    return top
+           ? todown()
+           : bottom
+           ? toup()
+           : toup() + todown();
+  };
+
+  return 1 + (left
+              ? toright() + topbottom()
+              : right
+              ? toleft() + topbottom()
+              : toleft() + toright() + topbottom());
 }
 
 int main() {     

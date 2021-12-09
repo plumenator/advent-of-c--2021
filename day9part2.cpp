@@ -49,101 +49,62 @@ What do you get if you multiply together the sizes of the three largest basins?
 #include <cassert>
 #include <cmath>
 
-auto identity = [](auto s) {
-    return s; 
-};
+int count_to_9(std::set<std::pair<int, int>>&& visited, const std::vector<std::vector<int>>& heightmap, int i, int j) {
+  if (visited.contains(std::pair<int, int>(i, j)))
+    return 0;
+  visited.insert(std::pair<int, int>(i,j));
 
-template<typename T>
-std::vector<T> split(std::string line, const std::string& delim, auto toT(std::string) -> T) {
-  std::vector<T> out;
-  for (;;) {
-    if(auto delim_position = line.find(delim);
-          delim_position != std::string::npos) {
-      out.push_back(toT(line.substr(0, delim_position)));
-      line = line.substr(delim_position + delim.size());
+  auto toright = [&]() {
+     return heightmap[i][j + 1] < 9
+            ? count_to_9(std::move(visited), heightmap, i, j + 1)
+            : 0;
+  };
+  auto todown = [&]() {
+    return heightmap[i + 1][j] < 9
+           ? count_to_9(std::move(visited), heightmap, i + 1, j)
+           : 0;
+  };
+  auto toup = [&]() {
+    return heightmap[i - 1][j] < 9
+           ? count_to_9(std::move(visited), heightmap, i - 1, j)
+           : 0;
+  };
+  auto toleft = [&]() {
+    return heightmap[i][j - 1] < 9
+    ? count_to_9(std::move(visited), heightmap, i, j - 1)
+    : 0;
+  };
+
+  bool top = i == 0;
+  bool bottom = i == heightmap.size() - 1;
+  bool left = j == 0;
+  bool right = j == heightmap[j].size() - 1;
+
+  if (left) {
+    if (top) {
+      return 1 + toright() + todown();
+    } else if (bottom) {
+      return 1 + toright() + toup();
     } else {
-    break;
+      return 1 + toright() + toup() + todown();
+    }
+  } else if (right) {
+    if (top) {
+      return 1 + toleft() + todown();
+    } else if (bottom) {
+      return 1 + toleft() + toup();
+    } else {
+      return 1 + toleft() + toup() + todown();
+    }        
+  } else {
+    if (top) {
+      return 1 + toleft() + toright() + todown();
+    } else if (bottom) {
+      return 1 + toleft() + toright() + toup();
+    } else {
+      return 1 + toleft() + toright() + toup() + todown();
     }
   }
-  out.push_back(toT(line));
-  return out;
-}
-
-template<typename T>
-std::vector<T> split(std::string line, const std::string& delim) {
-  return split<T>(line, delim, identity);
-}
-
-template<typename T>
-std::vector<T> split(std::string line) {
-  return split<T>(line, " ");
-}
-
-template<typename T>
-std::set<T> diff(const std::set<T>& first_set, const std::set<T>& second_set) {
-  std::set<T> out;
-  std:set_difference(first_set.begin(), first_set.end(), second_set.begin(), second_set.end(), std::inserter(out, out.begin()));
-  return out;
-}
-
-int count_to_9(std::set<std::pair<int, int>>&& visited, const std::vector<std::vector<int>>& heightmap, int i, int j) {
-      if (visited.contains(std::pair<int, int>(i, j)))
-        return 0;
-      visited.insert(std::pair<int, int>(i,j));
-      bool top = i == 0;
-      bool bottom = i == heightmap.size() - 1;
-      bool left = j == 0;
-      bool right = j == heightmap[j].size() - 1;
-
-      if (left) {
-        if (top) {
-          int toright = heightmap[i][j + 1] < 9 ? count_to_9(std::move(visited), heightmap, i, j + 1) : 0;
-          int todown = heightmap[i + 1][j] < 9 ? count_to_9(std::move(visited), heightmap, i + 1, j) : 0;
-          return 1 + toright + todown;
-        } else if (bottom) {
-          int toright = heightmap[i][j + 1] < 9 ? count_to_9(std::move(visited), heightmap, i, j + 1) : 0;
-          int toup = heightmap[i - 1][j] < 9 ? count_to_9(std::move(visited), heightmap, i - 1, j) : 0;
-          return 1 + toright + toup;
-        } else {
-          int toright = heightmap[i][j + 1] < 9 ? count_to_9(std::move(visited), heightmap, i, j + 1) : 0;
-          int toup = heightmap[i - 1][j] < 9 ? count_to_9(std::move(visited), heightmap, i - 1, j) : 0;
-          int todown = heightmap[i + 1][j] < 9 ? count_to_9(std::move(visited), heightmap, i + 1, j) : 0;
-          return 1 + toright + toup + todown;
-        }
-      } else if (right) {
-        if (top) {
-          int toleft = heightmap[i][j - 1] < 9 ? count_to_9(std::move(visited), heightmap, i, j - 1) : 0;
-          int todown = heightmap[i + 1][j] < 9 ? count_to_9(std::move(visited), heightmap, i + 1, j) : 0;
-          return 1 + toleft + todown;
-        } else if (bottom) {
-          int toleft = heightmap[i][j - 1] < 9 ? count_to_9(std::move(visited), heightmap, i, j - 1) : 0;
-          int toup = heightmap[i - 1][j] < 9 ? count_to_9(std::move(visited), heightmap, i - 1, j) : 0;
-          return 1 + toleft + toup;
-        } else {
-          int toleft = heightmap[i][j - 1] < 9 ? count_to_9(std::move(visited), heightmap, i, j - 1) : 0;
-          int toup = heightmap[i - 1][j] < 9 ? count_to_9(std::move(visited), heightmap, i - 1, j) : 0;
-          int todown = heightmap[i + 1][j] < 9 ? count_to_9(std::move(visited), heightmap, i + 1, j) : 0;
-          return 1 + toleft + toup + todown;
-        }        
-      } else {
-        if (top) {
-          int toleft = heightmap[i][j - 1] < 9 ? count_to_9(std::move(visited), heightmap, i, j - 1) : 0;
-          int toright = heightmap[i][j + 1] < 9 ? count_to_9(std::move(visited), heightmap, i, j + 1) : 0;
-          int todown = heightmap[i + 1][j] < 9 ? count_to_9(std::move(visited), heightmap, i + 1, j) : 0;
-          return 1 + toleft + toright + todown;
-        } else if (bottom) {
-          int toleft = heightmap[i][j - 1] < 9 ? count_to_9(std::move(visited), heightmap, i, j - 1) : 0;
-          int toright = heightmap[i][j + 1] < 9 ? count_to_9(std::move(visited), heightmap, i, j + 1) : 0;
-          int toup = heightmap[i - 1][j] < 9 ? count_to_9(std::move(visited), heightmap, i - 1, j) : 0;
-          return 1 + toleft + toright + toup;
-        } else {
-          int toleft = heightmap[i][j - 1] < 9 ? count_to_9(std::move(visited), heightmap, i, j - 1) : 0;
-          int toright = heightmap[i][j + 1] < 9 ? count_to_9(std::move(visited), heightmap, i, j + 1) : 0;
-          int toup = heightmap[i - 1][j] < 9 ? count_to_9(std::move(visited), heightmap, i - 1, j) : 0;
-          int todown = heightmap[i + 1][j] < 9 ? count_to_9(std::move(visited), heightmap, i + 1, j) : 0;
-          return 1 + toleft + toright + toup + todown;
-      }
-    }
 }
 
 int main() {     

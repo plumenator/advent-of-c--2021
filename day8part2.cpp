@@ -90,6 +90,13 @@ std::vector<T> split(std::string line) {
   return split<T>(line, " ");
 }
 
+template<typename T>
+std::set<T> diff(const std::set<T>& first_set, const std::set<T>& second_set) {
+  std::set<T> out;
+  std:set_difference(first_set.begin(), first_set.end(), second_set.begin(), second_set.end(), std::inserter(out, out.begin()));
+  return out;
+}
+
 enum class Digit {
   Zero, One, Two, Three, Four, Five, Six, Seven, Eight, Nine
 };
@@ -99,12 +106,6 @@ enum class SegmentCount{
 };
 
 using SegmentSet = std::set<char>;
-
-SegmentSet diff(const SegmentSet& first_set, const SegmentSet& second_set) {
-  SegmentSet out;
-  std:set_difference(first_set.begin(), first_set.end(), second_set.begin(), second_set.end(), std::inserter(out, out.begin()));
-  return out;
-}
 
 int main() {     
   std::vector<std::pair<std::vector<std::string>, std::vector<std::string>>> lines;

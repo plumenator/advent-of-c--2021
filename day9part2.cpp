@@ -113,51 +113,32 @@ int main() {
       bool bottom = i == heightmap.size() - 1;
       bool left = j == 0;
       bool right = j == heightmap[j].size() - 1;
-
-      if (left) {
-        if (top) {
-          if (heightmap[0][0] < heightmap[1][0] && heightmap[0][0] < heightmap[0][1]) {
-            basins.push_back(count_to_9({}, heightmap, i, j));
-          }
-        } else if (bottom) {
-          if (heightmap[i][0] < heightmap[i-1][0] && heightmap[i][0] < heightmap[i][1]) {
-            basins.push_back(count_to_9({}, heightmap, i, j));
-          }
-        } else {
-          if (heightmap[i][0] < heightmap[i+1][0] && heightmap[i][0] < heightmap[i][1] && heightmap[i][0] < heightmap[i-1][0]) {
-            basins.push_back(count_to_9({}, heightmap, i, j));
-          }
-        }
-      } else if (right) {
-        if (top) {
-          if (heightmap[0][j] < heightmap[1][j] && heightmap[0][j] < heightmap[0][j-1]) {
-            basins.push_back(count_to_9({}, heightmap, i, j));
-          }
-        } else if (bottom) {
-          if (heightmap[i][j] < heightmap[i-1][j] && heightmap[i][j] < heightmap[i][j-1]) {
-            basins.push_back(count_to_9({}, heightmap, i, j));
-          }
-        } else {
-          if (heightmap[i][j] < heightmap[i-1][j] && heightmap[i][j] < heightmap[i][j-1] && heightmap[i][j] < heightmap[i+1][j]) {
-            basins.push_back(count_to_9({}, heightmap, i, j));
-          }
-        }        
-      } else {
-        if (top) {
-          if (heightmap[0][j] < heightmap[0][j-1] && heightmap[0][j] < heightmap[0][j+1] && heightmap[0][j] < heightmap[1][j]) {
-            basins.push_back(count_to_9({}, heightmap, i, j));
-          }
-        } else if (bottom) {
-          if (heightmap[i][j] < heightmap[i-1][j] && heightmap[i][j] < heightmap[i][j-1] && heightmap[i][j] < heightmap[i][j+1]) {
-            basins.push_back(count_to_9({}, heightmap, i, j));
-          }
-        } else {
-          if (heightmap[i][j] < heightmap[i-1][j] && heightmap[i][j] < heightmap[i][j-1] && heightmap[i][j] < heightmap[i][j+1] && heightmap[i][j] < heightmap[i+1][j]) {
-            basins.push_back(count_to_9({}, heightmap, i, j));
-          }
-      }
+      auto toleft = [&]() {
+        return heightmap[i][j] < heightmap[i][j - 1];
+      };
+      auto toright = [&]() {
+        return heightmap[i][j] < heightmap[i][j + 1];
+      };
+      auto todown = [&]() {
+        return heightmap[i][j] < heightmap[i + 1][j];
+      };
+      auto toup = [&]() {
+        return heightmap[i][j] < heightmap[i - 1][j];
+      };
+      bool topdown = top
+                     ? todown()
+                     : bottom
+                     ? toup()
+                     : todown() && toup();
+      bool leftright = left
+                       ? toright()
+                       : right
+                       ? toleft()
+                       : toright() && toleft();
+      bool lowpoint = topdown && leftright;
+      if (lowpoint)
+        basins.push_back(count_to_9({}, heightmap, i, j));
     }
-  }
   }
 
   std::sort(basins.begin(), basins.end(), std::greater<int>());

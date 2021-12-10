@@ -4,7 +4,7 @@ Now, discard the corrupted lines. The remaining lines are incomplete.
 
 Incomplete lines don't have any incorrect characters - instead, they're missing some closing characters at the end of the line. To repair the navigation subsystem, you just need to figure out the sequence of closing characters that complete all open chunks in the line.
 
-You can only use closing characters (), ], }, or >), and you must add them in the correct order so that only legal pairs are formed and all chunks end up closed.
+You can only use closing characters (), ], }, or >), and you must add them in the correct order so that only legal pairs are formed and all chunks end up close_or_idd.
 
 In the example above, there are five incomplete lines:
 
@@ -48,7 +48,7 @@ Find the completion string for each incomplete line, score the completion string
 #include <cassert>
 #include <cmath>
 
-char close(char c) {
+char close_or_id(char c) {
   switch(c) {
       case '(':
         return ')';
@@ -74,7 +74,7 @@ long long check(const std::string& line) {
   long long score = 0;
   std::vector<char> stack;
   for (auto c: line) {
-    char c2 = close(c);
+    char c2 = close_or_id(c);
     if (c != c2)
         stack.push_back(c2);
     else if (c == stack.back())

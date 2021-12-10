@@ -63,36 +63,24 @@ char close(char c) {
   }
 }
 
+const std::map<char, long long> score_of = {
+  {')', 1},
+  {']', 2},
+  {'}', 3},
+  {'>', 4}
+};
+
 long long check(const std::string& line) {
-  const std::map<char, long long> score_of = {
-    {')', 1},
-    {']', 2},
-    {'}', 3},
-    {'>', 4}
-  };
   long long score = 0;
   std::vector<char> stack;
   for (auto c: line) {
-    switch (c) {
-      case '(':
-      case '[':
-      case '{':
-      case '<': 
-      stack.push_back(close(c));
-        break;
-      case ')':
-      case ']':
-      case '}':
-      case '>':
-        if (c == stack.back()) {
-          stack.pop_back();
-        } else {
-          return 0;
-        }
-        break;
-      default:
-        break;
-    }
+    char c2 = close(c);
+    if (c != c2)
+        stack.push_back(c2);
+    else if (c == stack.back())
+        stack.pop_back();
+    else
+        return 0;
   }
   for (; stack.size();  stack.pop_back()) {
     score = 5 * score + score_of.at(stack.back());
@@ -101,13 +89,8 @@ long long check(const std::string& line) {
 }
 
 int main() {     
-  std::vector<std::string> lines;
-  for (std::string line; std::getline(std::cin, line);) {
-    lines.push_back(line);
-  }
-
   std::vector<long long> scores;
-  for (auto line: lines) {
+  for (std::string line; std::getline(std::cin, line);) {
     long long score = check(line);
     if (score)
       scores.push_back(score);

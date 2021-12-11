@@ -71,30 +71,14 @@ int propagate(std::set<std::pair<int, int>>& flashed, std::vector<std::vector<in
     ? propagate(flashed, energies, x, y)
     : 0;
   };
-  auto toleft = [&]() {
-    return next(0, -1);
-  };
-  auto toright = [&]() {
-     return next(0, 1);
-  };
-  auto todown = [&]() {
-    return next(1, 0);
-  };
-  auto toup = [&]() {
-    return next(-1, 0);
-  };
-  auto toleftup = [&]() {
-    return next(-1, -1);
-  };
-  auto torightup = [&]() {
-     return next(-1, 1);
-  };
-  auto torightdown = [&]() {
-    return next(1, 1);
-  };
-  auto toleftdown = [&]() {
-    return next(1, -1);
-  };
+  auto toleft = [&]() { return next(0, -1); };
+  auto toright = [&]() { return next(0, 1); };
+  auto todown = [&]() { return next(1, 0); };
+  auto toup = [&]() { return next(-1, 0); };
+  auto toleftup = [&]() { return next(-1, -1); };
+  auto torightup = [&]() { return next(-1, 1); };
+  auto torightdown = [&]() { return next(1, 1); };
+  auto toleftdown = [&]() { return next(1, -1); };
 
   bool top = i == 0;
   bool bottom = i == energies.size() - 1;

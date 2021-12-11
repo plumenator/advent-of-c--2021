@@ -61,53 +61,39 @@ void bump(std::vector<std::vector<int>>& energies) {
 }
 
 int propagate(std::set<std::pair<int, int>>& flashed, std::vector<std::vector<int>>& energies, int i, int j) {
-  if (flashed.contains(std::pair<int, int>(i, j))
-    || i < 0 || j < 0 || i >= energies.size() || j >= energies[0].size()
-    )
-    return 0;
   flashed.emplace(i,j);
-
   energies[i][j] = 0;
 
-  auto toleft = [&]() {
-    return !flashed.contains({i, j - 1}) && ++energies[i][j - 1] > 9
-    ? propagate(flashed, energies, i, j - 1)
+  auto next = [&](int ioffset, int joffset) {
+    int x = i + ioffset;
+    int y = j + joffset;
+    return !flashed.contains({x, y}) && ++energies[x][y] > 9
+    ? propagate(flashed, energies, x, y)
     : 0;
+  };
+  auto toleft = [&]() {
+    return next(0, -1);
   };
   auto toright = [&]() {
-     return !flashed.contains({i, j + 1}) && ++energies[i][j + 1] > 9
-            ? propagate(flashed, energies, i, j + 1)
-            : 0;
+     return next(0, 1);
   };
   auto todown = [&]() {
-    return !flashed.contains({i + 1, j}) && ++energies[i + 1][j] > 9
-           ? propagate(flashed, energies, i + 1, j)
-           : 0;
+    return next(1, 0);
   };
   auto toup = [&]() {
-    return !flashed.contains({i - 1, j}) && ++energies[i - 1][j] > 9
-           ? propagate(flashed, energies, i - 1, j)
-           : 0;
+    return next(-1, 0);
   };
   auto toleftup = [&]() {
-    return !flashed.contains({i - 1, j - 1}) && ++energies[i - 1][j - 1] > 9
-    ? propagate(flashed, energies, i - 1, j - 1)
-    : 0;
+    return next(-1, -1);
   };
   auto torightup = [&]() {
-     return !flashed.contains({i - 1, j + 1}) && ++energies[i - 1][j + 1] > 9
-            ? propagate(flashed, energies, i - 1, j + 1)
-            : 0;
+     return next(-1, 1);
   };
   auto torightdown = [&]() {
-    return !flashed.contains({i + 1, j + 1}) && ++energies[i + 1][j + 1] > 9
-           ? propagate(flashed, energies, i + 1, j + 1)
-           : 0;
+    return next(1, 1);
   };
   auto toleftdown = [&]() {
-    return !flashed.contains({i + 1, j - 1}) && ++energies[i + 1][j - 1] > 9
-           ? propagate(flashed, energies, i + 1, j - 1)
-           : 0;
+    return next(1, -1);
   };
 
   bool top = i == 0;

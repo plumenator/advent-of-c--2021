@@ -130,6 +130,7 @@ int flash(std::vector<std::vector<int>>& energies) {
       }
     }
   }
+  assert(flashed.size() == flashes);
   return flashes;
 }
 

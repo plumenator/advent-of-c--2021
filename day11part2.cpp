@@ -85,6 +85,14 @@ int propagate(std::set<std::pair<int, int>>& flashed, std::vector<std::vector<in
   bool left = j == 0;
   bool right = j == energies[j].size() - 1;
 
+  auto leftright = [&]() {
+    return left
+            ? toright()
+            : right
+            ? toleft()
+            : toleft() + toright();
+  };
+  
   auto topbottom = [&]() {
     return top
            ? todown()
@@ -113,11 +121,7 @@ int propagate(std::set<std::pair<int, int>>& flashed, std::vector<std::vector<in
               : torightdown() + toleftdown() + torightup() + toleftup());
   };
 
-  return 1 + (left
-              ? toright()
-              : right
-              ? toleft()
-              : toleft() + toright()) + topbottom() + diagonal();
+  return 1 + leftright() + topbottom() + diagonal();
 }
 
 int flash(std::vector<std::vector<int>>& energies) {

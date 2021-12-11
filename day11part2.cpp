@@ -153,16 +153,12 @@ int propagate(std::set<std::pair<int, int>>& flashed, std::vector<std::vector<in
 int flash(std::vector<std::vector<int>>& energies) {
   int flashes = 0;
   std::set<std::pair<int, int>> flashed;
-  int i = 0;
-  for (auto& row: energies) {
-    int j = 0;
-    for (auto& energy: row) {
-      if (energy > 9) {
+  for (int i = 0; i < energies.size(); ++i) {
+    for (int j = 0; j < energies[i].size(); ++j) {
+      if (energies[i][j] > 9) {
         flashes += propagate(flashed, energies, i, j);
       }
-      ++j;
     }
-    ++i;
   }
   return flashes;
 }

@@ -189,7 +189,7 @@ int main() {
     auto pair = split<Cave>(line, "-");
     assert(pair.size() == 2);
     connections.push_back({pair[0], pair[1]});
-    if (pair[0] != "start" && pair[1] != Cave("end")) {
+    if (pair[0] != Cave("start") && pair[1] != Cave("end")) {
       connections.push_back({pair[1], pair[0]});
     }
     for (auto& cave: pair)

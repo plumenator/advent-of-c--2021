@@ -2,7 +2,7 @@
 --- Day 12: Passage Pathing ---
 With your submarine's subterranean subsystems subsisting suboptimally, the only way you're getting out of this cave anytime soon is by finding a path yourself. Not just a path - the only way to know if you've found the best path is to find all of them.
 
-Fortunately, the sensors are still mostly working, and so you build a rough map of the remaining caves (your puzzle input). For example:
+Fortunately, the sensors are still mostly working, and so you build a rough map of the remaining pair (your puzzle input). For example:
 
 start-A
 start-b
@@ -11,7 +11,7 @@ A-b
 b-d
 A-end
 b-end
-This is a list of how all of the caves are connected. You start in the cave named start, and your destination is the cave named end. An entry like b-d means that cave b is connected to cave d - that is, you can move between them.
+This is a list of how all of the pair are connected. You start in the cave named start, and your destination is the cave named end. An entry like b-d means that cave b is connected to cave d - that is, you can move between them.
 
 So, the above cave system looks roughly like this:
 
@@ -20,7 +20,7 @@ So, the above cave system looks roughly like this:
 c--A-----b--d
     \   /
      end
-Your goal is to find the number of distinct paths that start at start, end at end, and don't visit small caves more than once. There are two types of caves: big caves (written in uppercase, like A) and small caves (written in lowercase, like b). It would be a waste of time to visit any small cave more than once, but big caves are large enough that it might be worth visiting them multiple times. So, all paths you find should visit small caves at most once, and can visit big caves any number of times.
+Your goal is to find the number of distinct paths that start at start, end at end, and don't visit small pair more than once. There are two types of pair: big pair (written in uppercase, like A) and small pair (written in lowercase, like b). It would be a waste of time to visit any small cave more than once, but big pair are large enough that it might be worth visiting them multiple times. So, all paths you find should visit small pair at most once, and can visit big pair any number of times.
 
 Given these rules, there are 10 paths through this example cave system:
 
@@ -34,7 +34,7 @@ start,A,end
 start,b,A,c,A,end
 start,b,A,end
 start,b,end
-(Each line in the above list corresponds to a single path; the caves visited by that path are listed in the order they are visited and separated by commas.)
+(Each line in the above list corresponds to a single path; the pair visited by that path are listed in the order they are visited and separated by commas.)
 
 Note that in this cave system, cave d is never visited by any path: to do so, cave b would need to be visited twice (once on the way to cave d and a second time when returning from cave d), and since cave b is small, this is not allowed.
 
@@ -91,7 +91,7 @@ he-WI
 zg-he
 pj-fs
 start-RW
-How many paths through this cave system are there that visit small caves at most once?
+How many paths through this cave system are there that visit small pair at most once?
 */
 
 #include <iostream>
@@ -170,30 +170,44 @@ std::vector<Path> allpaths(Cave start, const std::multimap<Cave, Cave>& graph, s
   return paths;
 }
 
+std::multimap<Cave, Cave> repeat(const std::vector<std::pair<Cave, Cave>>& connections, Cave twice) {
+  std::multimap<Cave, Cave> graph;
+  for (auto& [first, second]: connections) {
+    graph.emplace(first, second);
+    if (first != Cave("start") && second == twice)
+      graph.emplace(first, second + second);
+    if (first == twice)
+      graph.emplace(twice + twice, second);
+  }
+  return graph;
+}
+
 int main() {     
   std::vector<std::pair<Cave, Cave>> connections;
+  std::set<Cave> caves;
   for (std::string line; std::getline(std::cin, line);) {
-    auto caves = split<Cave>(line, "-");
-    assert(caves.size() == 2);
-    connections.push_back({caves[0], caves[1]});
-    if (caves[0] != Cave("start") && caves[1] != Cave("end")) {
-      connections.push_back({caves[1], caves[0]});
+    auto pair = split<Cave>(line, "-");
+    assert(pair.size() == 2);
+    connections.push_back({pair[0], pair[1]});
+    if (pair[0] != "start" && pair[1] != Cave("end")) {
+      connections.push_back({pair[1], pair[0]});
     }
+    for (auto& cave: pair)
+      if (cave != Cave("start") && cave != Cave("end"))
+        caves.insert(cave);
   }
 
-  std::multimap<Cave, Cave> graph;
-  for (auto connection: connections) {
-    graph.insert(std::move(connection));
-  }
-  std::set<Cave> visited;
-  auto paths = allpaths(Cave("start"), graph, visited);
-  for (auto path: paths) {
-    for (int i = 0; auto cave: path) {
-      if (i++ > 0)
-        std::cout << ", ";
-      std::cout << cave;
+  std::set<Path> unique;
+  for (auto twice: caves) {
+    std::set<Cave> visited;
+    for (auto&& path: allpaths(Cave("start"), repeat(connections, twice), visited)) {
+      for (auto& cave: path) {
+        if (cave == (twice + twice)) {
+          cave = twice;
+        }
+      }
+      unique.insert(path);
     }
-    std::cout << std::endl;
   }
-  std::cout << paths.size() << std::endl;
+  std::cout << unique.size() << std::endl;
 }

@@ -17,16 +17,6 @@ What code do you use to activate the infrared thermal imaging camera system?
 #include <cctype>
 #include <list>
 
-using Cave = std::string;
-
-bool big(Cave cave) {
-  return std::isupper(cave[0]);
-}
-
-bool small(Cave cave) {
-  return std::islower(cave[0]);
-}
-
 auto identity = [](auto s) {
     return s; 
 };

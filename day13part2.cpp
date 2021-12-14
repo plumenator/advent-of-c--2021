@@ -112,9 +112,9 @@ int main() {
   for (int y = left_top.second; y <= right_bottom.second; ++y) {
     for (int x = left_top.first; x <= right_bottom.first; ++x) {
       if (unique.contains({x, y})) {
-        std::cout << '#';
+        std::cout << "\u2588";
       } else {
-        std::cout << '.';
+        std::cout << ' ';
       }
     }
     std::cout << "\n";
